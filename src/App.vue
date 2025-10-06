@@ -1,4 +1,5 @@
 <template>
+  <div @touchmove.passive="onGlobalTouchMove" class="h-screen">
   <div class="flex flex-col h-screen relative overflow-hidden font-mono bg-slate-900 text-slate-200">
     <!-- Верхний список -->
     <div
@@ -187,6 +188,7 @@
       </div>
     </div>
   </div>
+  </div>
 </template>
 
 <script>
@@ -231,6 +233,12 @@ export default {
     }
   },
   methods: {
+    onGlobalTouchMove(e) {
+      // Если идёт перетаскивание — блокируем свайп-закрытие
+      if (this.dragging) {
+        e.preventDefault();
+      }
+    },
     handleAddDay() {
       this.sourceItems.push({
         id: Date.now(),
@@ -456,9 +464,18 @@ export default {
   },
   mounted() {
     if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
-      window.Telegram.WebApp.disableVerticalSwipes();
-      // Опционально: отключить подтверждение закрытия
-      window.Telegram.WebApp.disableClosingConfirmation();
+      const app = window.Telegram.WebApp;
+      app.ready();
+
+      // Пытаемся отключить свайпы официально
+      if (typeof app.disableVerticalSwipes === 'function') {
+        app.disableVerticalSwipes();
+      }
+
+      // На всякий случай отключаем подтверждение закрытия
+      if (app.isClosingConfirmationEnabled) {
+        app.disableClosingConfirmation();
+      }
     }
   },
 };
