@@ -1,1 +1,62 @@
 @import "tailwindcss";
+
+/* src/assets/main.css или App.vue <style> */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  /* Промышленные градиенты */
+  .bg-metal {
+    background: linear-gradient(135deg, #2d3748, #1a202c);
+  }
+  .bg-steel {
+    background: linear-gradient(135deg, #4a5568, #2d3748);
+  }
+  .bg-machine-panel {
+    background: linear-gradient(145deg, #1e293b, #0f172a);
+  }
+
+  /* Акцент — как индикатор на станке */
+  .border-industrial {
+    border-color: #f97316; /* orange-500 */
+  }
+  .text-industrial {
+    color: #f97316;
+  }
+  .bg-industrial {
+    background-color: #f97316;
+  }
+  .hover\\:bg-industrial:hover {
+    background-color: #ea580c;
+  }
+
+  /* Механическая анимация "включения" */
+  @keyframes machineClick {
+    0% { transform: scale(1); }
+    50% { transform: scale(0.98); }
+    100% { transform: scale(1); }
+  }
+  .animate-machine-click {
+    animation: machineClick 0.2s ease-out;
+  }
+
+  /* Градиент кнопки — как панель управления */
+  .btn-machine {
+    @apply bg-gradient-to-r from-slate-700 to-slate-800 text-white font-bold border border-slate-600 shadow-md;
+  }
+  .btn-machine:hover {
+    @apply from-slate-600 to-slate-700 border-slate-500;
+  }
+  .btn-machine:active {
+    @apply animate-machine-click;
+  }
+
+  /* Градиент для popup — как дисплей станка */
+  .popup-machine {
+    background: linear-gradient(145deg, #1e293b, #0f172a);
+    border: 1px solid #334155;
+    box-shadow: 0 0 12px rgba(249, 115, 22, 0.3);
+  }
+}

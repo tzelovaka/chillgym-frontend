@@ -1,16 +1,16 @@
 <template>
-  <div class="flex flex-col h-screen relative overflow-hidden font-sans">
-    <!-- Верхний список (без сортировки!) -->
+  <div class="flex flex-col h-screen relative overflow-hidden font-mono bg-slate-900 text-slate-200">
+    <!-- Верхний список -->
     <div
       ref="targetContainer"
-      class="bg-amber-50 border-b border-orange-500 overflow-y-auto"
+      class="bg-machine-panel border-b pt-2 border-industrial overflow-y-auto"
       style="height: 40vh"
     >
       <div
         v-if="targetItems.length === 0"
-        class="h-full flex items-center justify-center text-orange-600 text-sm font-medium"
+        class="h-full flex items-center justify-center text-industrial text-sm font-medium"
       >
-        Перетащите сюда тренажёры
+        Перетащите сюда упражнения
       </div>
       <div
         v-for="item in targetItems"
@@ -18,48 +18,48 @@
         @touchstart.passive="onTouchStart(item, 'target')"
         @touchmove.passive="onTouchMove"
         @touchend="onTouchEnd"
-        class="relative touch-none select-none cursor-grab bg-white border-l-4 border-orange-600 p-3 mb-2 mx-3 rounded-md transition-transform hover:scale-[1.01]"
-        :class="{ 'opacity-70 scale-95': dragging && dragItem?.id === item.id }"
+        class="relative touch-none select-none cursor-grab bg-slate-800 border-l-4 border-industrial p-3 mb-2 mx-3 rounded-sm transition-transform hover:scale-[1.005]"
+        :class="{ 'opacity-60 scale-95': dragging && dragItem?.id === item.id }"
       >
-        <div class="text-xs text-gray-600 font-semibold mb-1">{{ formatTime(item.addedAt) }}</div>
-        <div class="font-bold text-gray-900 text-base">{{ item.name }}</div>
+        <div class="text-xs text-slate-400 font-mono mb-1">{{ formatTime(item.addedAt) }}</div>
+        <div class="font-bold text-slate-100 text-base">{{ item.name }}</div>
         <div
           :class="[
-            'text-sm font-medium mt-1',
+            'text-sm font-mono mt-1',
             item.sets && item.sets.length
-              ? 'text-orange-700'
-              : 'text-gray-400 italic'
+              ? 'text-industrial'
+              : 'text-slate-500 italic'
           ]"
         >
-          Количество подходов: {{ item.sets?.length || 0 }}
+          Подходов: {{ item.sets?.length || 0 }}
         </div>
       </div>
     </div>
 
-    <div class="h-px bg-orange-300"></div>
+    <div class="h-px bg-gradient-to-r from-transparent via-industrial to-transparent"></div>
 
     <!-- Нижний список -->
-    <div class="flex-1 overflow-y-auto p-4 bg-gray-100">
+    <div class="flex-1 overflow-y-auto p-4 bg-slate-800">
       <button
         @click="handleAddDay"
-        class="mb-4 px-5 py-2.5 bg-orange-600 text-white font-bold rounded-lg hover:bg-orange-700 transition-colors duration-200 shadow-none"
+        class="mb-4 px-5 py-2.5 btn-machine rounded transition-all duration-150"
       >
-        + Добавить тренажёр
+        + ДОБАВИТЬ УПРАЖНЕНИЯ
       </button>
 
-      <div ref="sourceContainer" class="space-y-3">
+      <div ref="sourceContainer" class="space-y-2">
         <div
           v-for="item in sourceItems"
           :key="`source-${item.id}`"
           @touchstart.passive="onTouchStart(item, 'source')"
           @touchmove.passive="onTouchMove"
           @touchend="onTouchEnd"
-          class="relative touch-none select-none cursor-grab bg-white border border-gray-300 p-3 rounded-lg transition-transform hover:scale-[1.01] shadow-none"
-          :class="{ 'opacity-70 scale-95': dragging && dragItem?.id === item.id }"
+          class="relative touch-none select-none cursor-grab bg-slate-700 border border-slate-600 p-3 rounded-sm transition-transform hover:scale-[1.005]"
+          :class="{ 'opacity-60 scale-95': dragging && dragItem?.id === item.id }"
         >
-          <div class="font-bold text-gray-900 text-base">🏋️ {{ item.name }}</div>
-          <div v-if="item.repsMin !== undefined" class="text-sm text-gray-700 mt-1">
-            Повторения: <span class="font-semibold text-orange-700">{{ item.repsMin }}–{{ item.repsMax }}</span>
+          <div class="font-bold text-slate-100 text-base">⚙️ {{ item.name }}</div>
+          <div v-if="item.repsMin !== undefined" class="text-sm text-slate-300 mt-1 font-mono">
+            Повторения: <span class="font-bold text-industrial">{{ item.repsMin }}–{{ item.repsMax }}</span>
           </div>
         </div>
       </div>
@@ -68,83 +68,84 @@
     <!-- Popup -->
     <div
       v-if="editItem"
-      class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50"
+      class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50"
       @click="closeEditPopup"
     >
       <div
-        class="bg-white rounded-lg p-5 w-11/12 max-w-md mx-4 shadow-xl border border-gray-200 max-h-[85vh] overflow-hidden"
+        class="popup-machine rounded-lg p-5 w-11/12 max-w-md mx-4 shadow-2xl overflow-hidden"
+        :class="{ 'h-[75vh]': editMode !== 'source' }"
         @click.stop
         @contextmenu.prevent
       >
         <div class="flex justify-between items-start mb-4">
-          <h3 class="text-lg font-bold text-gray-900">
-            {{ editMode === 'source' ? 'Редактировать тренажёр' : 'Настройки упражнения' }}
+          <h3 class="text-lg font-bold text-industrial">
+            {{ editMode === 'source' ? 'РЕДАКТИРОВАТЬ ТРЕНАЖЁР' : 'НАСТРОЙКИ УПРАЖНЕНИЯ' }}
           </h3>
-          <button @click="closeEditPopup" class="text-gray-500 hover:text-gray-800 text-xl font-bold">&times;</button>
+          <button @click="closeEditPopup" class="text-slate-400 hover:text-industrial text-xl font-bold">&times;</button>
         </div>
 
-        <!-- Нижний список: редактирование -->
+        <!-- Source edit -->
         <div v-if="editMode === 'source'" class="space-y-4">
           <input
             v-model="editItem.name"
             type="text"
-            class="w-full px-3 py-2.5 border border-gray-400 rounded-md text-base focus:border-orange-600 focus:outline-none focus:ring-1 focus:ring-orange-300"
+            class="w-full px-3 py-2.5 bg-slate-800 border border-slate-600 rounded text-slate-100 focus:border-industrial focus:outline-none focus:ring-1 focus:ring-industrial/30 font-mono"
             placeholder="Название тренажёра"
           />
           <div class="flex space-x-2">
-            <input
-              v-model.number="editItem.repsMin"
-              type="number"
-              min="1"
-              class="w-full px-3 py-2.5 border border-gray-400 rounded-md text-center focus:border-orange-600 focus:outline-none"
-              placeholder="От"
-            />
-            <input
-              v-model.number="editItem.repsMax"
-              type="number"
-              min="1"
-              class="w-full px-3 py-2.5 border border-gray-400 rounded-md text-center focus:border-orange-600 focus:outline-none"
-              placeholder="До"
-            />
+            <div class="flex-1">
+              <div class="text-xs text-white text-right mb-1"><span class="bg-industrial rounded px-2 py-0.5 font-bold">ОТ</span></div>
+              <input
+                v-model.number="editItem.repsMin"
+                type="number"
+                min="1"
+                class="w-full px-3 py-2.5 bg-slate-800 border border-slate-600 rounded text-center text-slate-100 focus:border-industrial focus:outline-none font-mono"
+              />
+            </div>
+            <div class="flex-1">
+              <div class="text-xs text-white text-right mb-1"><span class="bg-industrial rounded px-2 py-0.5 font-bold">ДО</span></div>
+              <input
+                v-model.number="editItem.repsMax"
+                type="number"
+                min="1"
+                class="w-full px-3 py-2.5 bg-slate-800 border border-slate-600 rounded text-center text-slate-100 focus:border-industrial focus:outline-none font-mono"
+              />
+            </div>
           </div>
         </div>
 
-        <!-- Верхний список: редактирование -->
+        <!-- Target edit -->
         <div v-else class="space-y-4">
           <div>
-            <label class="block text-sm font-semibold text-gray-800 mb-2">Количество подходов</label>
+            <label class="block text-sm font-bold text-slate-300 mb-2">ПОДХОДЫ</label>
             <input
               v-model.number="editItem.setsCount"
               type="range"
               min="0"
               max="100"
-              step="1"
-              class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-orange-600"
+              class="w-full h-2 bg-slate-700 rounded appearance-none cursor-pointer accent-industrial"
             />
-            <div class="text-right text-sm text-gray-600 mt-1">{{ editItem.setsCount || 0 }}</div>
+            <div class="text-right text-sm text-slate-400 mt-1 font-mono">{{ editItem.setsCount || 0 }}</div>
           </div>
 
-          <div
-            v-if="editItem.setsCount > 0"
-            class="max-h-60 overflow-y-auto pr-1 space-y-3"
-          >
+          <div class="max-h-60 overflow-y-auto p-2 space-y-3 h-[60vh] bg-slate-800/50 rounded border border-slate-700">
             <div
               v-for="(set, index) in editItem.sets"
               :key="index"
-              class="p-3 border border-orange-200 rounded-md bg-orange-50"
+              class="p-3 border border-slate-700 rounded bg-slate-800/70"
             >
-              <div class="font-semibold text-orange-800 text-xs mb-2">Подход {{ index + 1 }}</div>
+              <div class="font-bold text-industrial text-xs mb-2">ПОДХОД {{ index + 1 }}</div>
               <div class="grid grid-cols-2 gap-2">
                 <input
                   v-model.number="set.weight"
                   type="number"
                   min="0"
-                  class="col-span-1 px-2.5 py-1.5 border border-gray-400 rounded text-sm focus:border-orange-600 focus:outline-none"
+                  class="col-span-1 px-2.5 py-1.5 bg-slate-700 border border-slate-600 rounded text-sm text-slate-100 focus:border-industrial focus:outline-none font-mono"
                   placeholder="Вес"
                 />
                 <select
                   v-model="set.unit"
-                  class="col-span-1 px-2.5 py-1.5 border border-gray-400 rounded text-sm focus:border-orange-600 focus:outline-none"
+                  class="col-span-1 px-2.5 py-1.5 bg-slate-700 border border-slate-600 rounded text-sm text-slate-100 focus:border-industrial focus:outline-none font-mono"
                 >
                   <option value="kg">кг</option>
                   <option value="ue">у.е.</option>
@@ -153,34 +154,34 @@
                   v-model.number="set.reps"
                   type="number"
                   min="1"
-                  class="col-span-1 px-2.5 py-1.5 border border-gray-400 rounded text-sm focus:border-orange-600 focus:outline-none"
+                  class="col-span-1 px-2.5 py-1.5 bg-slate-700 border border-slate-600 rounded text-sm text-slate-100 focus:border-industrial focus:outline-none font-mono"
                   placeholder="Повторения"
                 />
                 <div class="flex items-center">
                   <input
                     v-model="set.failure"
                     type="checkbox"
-                    class="mr-2 h-4 w-4 text-orange-600 rounded focus:ring-orange-500"
+                    class="mr-2 h-4 w-4 accent-industrial"
                   />
-                  <span class="text-xs text-gray-700">Отказ</span>
+                  <span class="text-xs text-slate-400">ОТКАЗ</span>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        <div class="mt-6 flex justify-between space-x-2">
+        <div class="mt-6 flex space-x-2">
           <button
             @click="deleteItem"
-            class="px-4 py-2.5 bg-red-600 text-white font-semibold rounded-md flex-1 hover:bg-red-700 transition-colors shadow-none"
+            class="flex-1 py-2.5 bg-red-700 text-white font-bold rounded hover:bg-red-800 transition-colors"
           >
-            Удалить
+            УДАЛИТЬ
           </button>
           <button
             @click="saveEdit"
-            class="px-4 py-2.5 bg-orange-600 text-white font-semibold rounded-md flex-1 hover:bg-orange-700 transition-colors shadow-none"
+            class="flex-1 py-2.5 btn-machine"
           >
-            Сохранить
+            СОХРАНИТЬ
           </button>
         </div>
       </div>
@@ -457,11 +458,4 @@ export default {
 </script>
 
 <style>
-* {
-  -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-}
 </style>
