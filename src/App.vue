@@ -454,6 +454,13 @@ export default {
     document.body.style.webkitUserSelect = '';
     document.body.style.userSelect = '';
   },
+  mounted() {
+    if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
+      window.Telegram.WebApp.disableVerticalSwipes();
+      // Опционально: отключить подтверждение закрытия
+      window.Telegram.WebApp.disableClosingConfirmation();
+    }
+  },
 };
 </script>
 
