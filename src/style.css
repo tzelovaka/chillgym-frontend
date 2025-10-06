@@ -28,18 +28,12 @@
   .bg-industrial {
     background-color: #f97316;
   }
-  .hover\\:bg-industrial:hover {
-    background-color: #ea580c;
-  }
 
   /* Механическая анимация "включения" */
   @keyframes machineClick {
     0% { transform: scale(1); }
     50% { transform: scale(0.98); }
     100% { transform: scale(1); }
-  }
-  .animate-machine-click {
-    animation: machineClick 0.2s ease-out;
   }
 
   /* Градиент кнопки — как панель управления */
@@ -48,9 +42,6 @@
   }
   .btn-machine:hover {
     @apply from-slate-600 to-slate-700 border-slate-500;
-  }
-  .btn-machine:active {
-    @apply animate-machine-click;
   }
 
   /* Градиент для popup — как дисплей станка */
