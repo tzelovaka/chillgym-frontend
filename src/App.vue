@@ -1,5 +1,4 @@
 <template>
-  <div @touchmove.passive="onGlobalTouchMove" class="h-screen">
   <div class="flex flex-col h-screen relative overflow-hidden font-mono bg-slate-900 text-slate-200">
     <!-- Верхний список -->
     <div
@@ -188,7 +187,6 @@
       </div>
     </div>
   </div>
-  </div>
 </template>
 
 <script>
@@ -220,10 +218,30 @@ export default {
       targetBackup: null,
     };
   },
+  mounted() {
+    // === Telegram Mini App: отключаем свайп-закрытие ===
+    if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
+      const app = window.Telegram.WebApp;
+
+      // Говорим Telegram, что приложение готово
+      app.ready();
+
+      // 🔑 Главное: отключаем вертикальный свайп (старый, но рабочий способ)
+      app.allow_vertical_swipe = false;
+
+      // Также расширяем на весь экран — критически важно!
+      app.expand();
+
+      // Опционально: отключаем подтверждение закрытия
+      if (app.isClosingConfirmationEnabled) {
+        app.disableClosingConfirmation();
+      }
+    }
+  },
   watch: {
     'editItem.setsCount'(newVal) {
-      if (this.editMode !== 'target') return;
-      if (newVal == null || newVal < 0) newVal = 0;
+      if (!this.editItem || this.editMode !== 'target') return;
+      newVal = Math.max(0, newVal || 0);
       const oldSets = this.editItem.sets || [];
       const newSets = [];
       for (let i = 0; i < newVal; i++) {
@@ -233,12 +251,6 @@ export default {
     }
   },
   methods: {
-    onGlobalTouchMove(e) {
-      // Если идёт перетаскивание — блокируем свайп-закрытие
-      if (this.dragging) {
-        e.preventDefault();
-      }
-    },
     handleAddDay() {
       this.sourceItems.push({
         id: Date.now(),
@@ -282,11 +294,11 @@ export default {
           repsMax: item.repsMax ?? 12
         };
       } else {
-        const sets = item.sets || [];
+        const sets = Array.isArray(item.sets) ? item.sets : [];
         this.editItem = {
           id: item.id,
           name: item.name,
-          setsCount: sets.length || 0,
+          setsCount: sets.length,
           sets: sets.map(s => ({ ...s }))
         };
       }
@@ -321,7 +333,6 @@ export default {
     startDrag() {
       this.dragging = true;
 
-      // Запрещаем перетаскивание в верхнем списке (сортировку)
       if (this.dragMode === 'target') {
         this.cleanupDrag();
         return;
@@ -332,19 +343,21 @@ export default {
       Object.assign(this.clone.style, {
         position: "fixed",
         zIndex: "9999",
-        background: "white",
+        background: "#1e293b",
+        color: "white",
         padding: "12px",
-        borderRadius: "8px",
-        boxShadow: "0 4px 10px rgba(255, 107, 53, 0.25)",
+        borderRadius: "6px",
+        boxShadow: "0 4px 12px rgba(249, 115, 22, 0.4)",
         pointerEvents: "none",
         opacity: "0.95",
-        left: `${event.touches[0].clientX - 60}px`,
+        left: `${event.touches[0].clientX - 80}px`,
         top: `${event.touches[0].clientY - 20}px`,
-        minWidth: "130px",
+        minWidth: "140px",
         textAlign: "center",
         fontWeight: "bold",
-        border: "2px solid #e65a2c",
+        border: "2px solid #f97316",
         fontSize: "14px",
+        fontFamily: "monospace"
       });
       document.body.appendChild(this.clone);
 
@@ -368,14 +381,13 @@ export default {
                 id: `${item.id}-${Date.now()}`,
                 name: item.name,
                 addedAt: new Date(),
-                sets: []
+                sets: [] // ← всегда массив!
               });
             }
           } else {
             this.updateSourceOrder();
           }
         }
-        // Сортировка в target отключена — ничего не делаем
 
         if (this.clone) {
           document.body.removeChild(this.clone);
@@ -392,7 +404,7 @@ export default {
 
       const container = this.$refs.sourceContainer;
       const items = Array.from(container.children);
-      let newIndex = 0;
+      let newIndex = items.length - 1;
       for (let i = 0; i < items.length; i++) {
         const rect = items[i].getBoundingClientRect();
         if (event.changedTouches[0].clientY < rect.bottom) {
@@ -462,24 +474,5 @@ export default {
     document.body.style.webkitUserSelect = '';
     document.body.style.userSelect = '';
   },
-  mounted() {
-    if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
-      const app = window.Telegram.WebApp;
-      app.ready();
-
-      // Пытаемся отключить свайпы официально
-      if (typeof app.disableVerticalSwipes === 'function') {
-        app.disableVerticalSwipes();
-      }
-
-      // На всякий случай отключаем подтверждение закрытия
-      if (app.isClosingConfirmationEnabled) {
-        app.disableClosingConfirmation();
-      }
-    }
-  },
 };
 </script>
-
-<style>
-</style>
