@@ -10,27 +10,44 @@ const app = createApp(App)
 app.use(createPinia())
 app.use(router)
 
-// Инициализация Telegram Web App ДО монтирования приложения
-if (window.Telegram?.WebApp) {
-  const tg = window.Telegram.WebApp;
+// Функция инициализации Telegram Web App
+function initializeTelegramApp() {
+  try {
+    if (window.Telegram?.WebApp) {
+      const tg = window.Telegram.WebApp;
 
-  // Инициализация с отключенными свайпами
-  tg.disableVerticalSwipes();
-  tg.expand();
+      // Дожидаемся полной инициализации
+      tg.ready();
 
-  // Устанавливаем тему
-  tg.setHeaderColor('#000000');
-  tg.setBackgroundColor('#ffffff');
+      // Основные настройки
+      tg.disableVerticalSwipes();
+      tg.expand();
 
-  // Дополнительные настройки для лучшего UX
-  tg.enableClosingConfirmation(); // Запрос подтверждения при закрытии
-  tg.MainButton.setParams({
-    color: '#000000',
-    text_color: '#ffffff'
-  });
+      // Настройка темы
+      tg.setHeaderColor('#000000');
+      tg.setBackgroundColor('#ffffff');
 
-  // Можно также сохранить tg в глобальной переменной для доступа из компонентов
+      // Дополнительные улучшения
+      tg.enableClosingConfirmation();
+
+      console.log('Telegram Web App initialized successfully');
+      return tg;
+    }
+  } catch (error) {
+    console.warn('Telegram Web App initialization failed:', error);
+  }
+  return null;
+}
+
+// Инициализируем перед монтированием
+const tg = initializeTelegramApp();
+
+// Если нужно использовать tg в компонентах
+if (tg) {
   app.config.globalProperties.$tg = tg;
+
+  // Также можно провайдить tg через provide/inject
+  app.provide('telegram', tg);
 }
 
 app.mount('#app')
