@@ -200,12 +200,10 @@
 
 <script>
 import './style.css'
-import { useViewport } from 'vue-tg'
 export default {
   name: 'DraggableComponent',
   data() {
     return {
-      tg: useViewport(),
       sourceItems: [
         { id: 1, name: 'Жим лёжа', repsMin: 8, repsMax: 12 },
         { id: 2, name: 'Приседания', repsMin: 6, repsMax: 10 },
@@ -458,8 +456,11 @@ export default {
       this.closeEditPopup()
     },
   },
-  beforeMount() {
-    this.tg.isVerticalSwipesEnabled = false
+  mounted() {
+    const tg = window.Telegram?.WebApp;
+    if (tg && typeof tg.disableVerticalSwipes === 'function') {
+      tg.disableVerticalSwipes();
+    }
   },
   beforeUnmount() {
     clearTimeout(this.longPressTimer)
