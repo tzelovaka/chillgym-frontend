@@ -1,5 +1,7 @@
 <template>
-  <div class="flex flex-col h-screen relative overflow-hidden font-mono bg-slate-900 text-slate-200">
+  <div
+    class="flex flex-col h-screen relative overflow-hidden font-mono bg-slate-900 text-slate-200"
+  >
     <!-- Верхний список -->
     <div
       ref="targetContainer"
@@ -26,9 +28,7 @@
         <div
           :class="[
             'text-sm font-mono mt-1',
-            item.sets && item.sets.length
-              ? 'text-industrial'
-              : 'text-slate-500 italic'
+            item.sets && item.sets.length ? 'text-industrial' : 'text-slate-500 italic',
           ]"
         >
           Подходов: {{ item.sets?.length || 0 }}
@@ -59,7 +59,8 @@
         >
           <div class="font-bold text-slate-100 text-base">⚙️ {{ item.name }}</div>
           <div v-if="item.repsMin !== undefined" class="text-sm text-slate-300 mt-1 font-mono">
-            Повторения: <span class="font-bold text-industrial">{{ item.repsMin }}–{{ item.repsMax }}</span>
+            Повторения:
+            <span class="font-bold text-industrial">{{ item.repsMin }}–{{ item.repsMax }}</span>
           </div>
         </div>
       </div>
@@ -81,7 +82,12 @@
           <h3 class="text-lg font-bold text-industrial">
             {{ editMode === 'source' ? 'РЕДАКТИРОВАТЬ ТРЕНАЖЁР' : 'НАСТРОЙКИ УПРАЖНЕНИЯ' }}
           </h3>
-          <button @click="closeEditPopup" class="text-slate-400 hover:text-industrial text-xl font-bold">&times;</button>
+          <button
+            @click="closeEditPopup"
+            class="text-slate-400 hover:text-industrial text-xl font-bold"
+          >
+            &times;
+          </button>
         </div>
 
         <!-- Source edit -->
@@ -94,7 +100,9 @@
           />
           <div class="flex space-x-2">
             <div class="flex-1">
-              <div class="text-xs text-white text-right mb-1"><span class="bg-industrial rounded px-2 py-0.5 font-bold">ОТ</span></div>
+              <div class="text-xs text-white text-right mb-1">
+                <span class="bg-industrial rounded px-2 py-0.5 font-bold">ОТ</span>
+              </div>
               <input
                 v-model.number="editItem.repsMin"
                 type="number"
@@ -103,7 +111,9 @@
               />
             </div>
             <div class="flex-1">
-              <div class="text-xs text-white text-right mb-1"><span class="bg-industrial rounded px-2 py-0.5 font-bold">ДО</span></div>
+              <div class="text-xs text-white text-right mb-1">
+                <span class="bg-industrial rounded px-2 py-0.5 font-bold">ДО</span>
+              </div>
               <input
                 v-model.number="editItem.repsMax"
                 type="number"
@@ -125,10 +135,14 @@
               max="100"
               class="w-full h-2 bg-slate-700 rounded appearance-none cursor-pointer accent-industrial"
             />
-            <div class="text-right text-sm text-slate-400 mt-1 font-mono">{{ editItem.setsCount || 0 }}</div>
+            <div class="text-right text-sm text-slate-400 mt-1 font-mono">
+              {{ editItem.setsCount || 0 }}
+            </div>
           </div>
 
-          <div class="max-h-60 overflow-y-auto p-2 space-y-3 h-[60vh] bg-slate-800/50 rounded border border-slate-700">
+          <div
+            class="max-h-60 overflow-y-auto p-2 space-y-3 h-[60vh] bg-slate-800/50 rounded border border-slate-700"
+          >
             <div
               v-for="(set, index) in editItem.sets"
               :key="index"
@@ -177,12 +191,7 @@
           >
             УДАЛИТЬ
           </button>
-          <button
-            @click="saveEdit"
-            class="flex-1 py-2.5 btn-machine"
-          >
-            СОХРАНИТЬ
-          </button>
+          <button @click="saveEdit" class="flex-1 py-2.5 btn-machine">СОХРАНИТЬ</button>
         </div>
       </div>
     </div>
@@ -191,6 +200,9 @@
 
 <script>
 import "./style.css";
+import {useViewport} from 'vue-tg'
+
+const tg = useViewport().isVerticalSwipesEnabled = false;
 
 export default {
   name: "DraggableComponent",
@@ -457,5 +469,4 @@ export default {
 };
 </script>
 
-<style>
-</style>
+<style></style>
