@@ -17,8 +17,8 @@
       <div
         v-for="item in targetItems"
         :key="`target-${item.id}`"
-        @touchstart.passive="onTouchStart(item, 'target')"
-        @touchmove.passive="onTouchMove"
+        @touchstart="onTouchStart(item, 'target')"
+        @touchmove="onTouchMove"
         @touchend="onTouchEnd"
         class="relative touch-none select-none cursor-grab bg-slate-800 border-l-4 border-industrial p-3 mb-2 mx-3 rounded-sm transition-transform hover:scale-[1.005]"
         :class="{ 'opacity-60 scale-95': dragging && dragItem?.id === item.id }"
@@ -51,8 +51,8 @@
         <div
           v-for="item in sourceItems"
           :key="`source-${item.id}`"
-          @touchstart.passive="onTouchStart(item, 'source')"
-          @touchmove.passive="onTouchMove"
+          @touchstart="onTouchStart(item, 'source')"
+          @touchmove="onTouchMove"
           @touchend="onTouchEnd"
           class="relative touch-none select-none cursor-grab bg-slate-700 border border-slate-600 p-3 rounded-sm transition-transform hover:scale-[1.005]"
           :class="{ 'opacity-60 scale-95': dragging && dragItem?.id === item.id }"
@@ -303,6 +303,8 @@ export default {
       if (dy > 5) {
         clearTimeout(this.longPressTimer)
         this.hasMoved = true
+
+        e.preventDefault()
 
         if (!this.dragging) {
           this.startDrag()

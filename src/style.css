@@ -51,3 +51,7 @@
     box-shadow: 0 0 12px rgba(249, 115, 22, 0.3);
   }
 }
+
+.touch-none {
+  touch-action: none;
+}
