@@ -199,19 +199,17 @@
 </template>
 
 <script>
-import "./style.css";
-import {useViewport} from 'vue-tg'
-
-const tg = useViewport().isVerticalSwipesEnabled = false;
-
+import './style.css'
+import { useViewport } from 'vue-tg'
 export default {
-  name: "DraggableComponent",
+  name: 'DraggableComponent',
   data() {
     return {
+      tg: useViewport(),
       sourceItems: [
-        { id: 1, name: "Жим лёжа", repsMin: 8, repsMax: 12 },
-        { id: 2, name: "Приседания", repsMin: 6, repsMax: 10 },
-        { id: 3, name: "Тяга штанги", repsMin: 10, repsMax: 15 }
+        { id: 1, name: 'Жим лёжа', repsMin: 8, repsMax: 12 },
+        { id: 2, name: 'Приседания', repsMin: 6, repsMax: 10 },
+        { id: 3, name: 'Тяга штанги', repsMin: 10, repsMax: 15 },
       ],
       targetItems: [],
       editItem: null,
@@ -228,19 +226,19 @@ export default {
       enteredTargetZone: false,
       sourceBackup: null,
       targetBackup: null,
-    };
+    }
   },
   watch: {
     'editItem.setsCount'(newVal) {
-      if (this.editMode !== 'target') return;
-      if (newVal == null || newVal < 0) newVal = 0;
-      const oldSets = this.editItem.sets || [];
-      const newSets = [];
+      if (this.editMode !== 'target') return
+      if (newVal == null || newVal < 0) newVal = 0
+      const oldSets = this.editItem.sets || []
+      const newSets = []
       for (let i = 0; i < newVal; i++) {
-        newSets.push({ ...oldSets[i] } || { weight: null, unit: 'kg', reps: null, failure: false });
+        newSets.push({ ...oldSets[i] } || { weight: null, unit: 'kg', reps: null, failure: false })
       }
-      this.editItem.sets = newSets;
-    }
+      this.editItem.sets = newSets
+    },
   },
   methods: {
     handleAddDay() {
@@ -248,33 +246,33 @@ export default {
         id: Date.now(),
         name: `Тренажёр ${Date.now()}`,
         repsMin: 8,
-        repsMax: 12
-      });
+        repsMax: 12,
+      })
     },
 
     formatTime(date) {
-      const d = new Date(date);
-      return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const d = new Date(date)
+      return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     },
 
     onTouchStart(item, mode) {
-      if (this.editItem) return;
+      if (this.editItem) return
 
-      this.dragItem = item;
-      this.dragMode = mode;
-      this.hasMoved = false;
-      this.enteredTargetZone = false;
+      this.dragItem = item
+      this.dragMode = mode
+      this.hasMoved = false
+      this.enteredTargetZone = false
 
-      document.body.style.webkitUserSelect = 'none';
-      document.body.style.userSelect = 'none';
+      document.body.style.webkitUserSelect = 'none'
+      document.body.style.userSelect = 'none'
 
       this.longPressTimer = setTimeout(() => {
         if (!this.hasMoved) {
-          this.openEditPopup(item, mode);
+          this.openEditPopup(item, mode)
         }
-      }, 600);
+      }, 600)
 
-      this.startY = event.touches[0].clientY;
+      this.startY = event.touches[0].clientY
     },
 
     openEditPopup(item, mode) {
@@ -283,190 +281,193 @@ export default {
           id: item.id,
           name: item.name,
           repsMin: item.repsMin ?? 8,
-          repsMax: item.repsMax ?? 12
-        };
+          repsMax: item.repsMax ?? 12,
+        }
       } else {
-        const sets = item.sets || [];
+        const sets = item.sets || []
         this.editItem = {
           id: item.id,
           name: item.name,
           setsCount: sets.length || 0,
-          sets: sets.map(s => ({ ...s }))
-        };
+          sets: sets.map((s) => ({ ...s })),
+        }
       }
-      this.editMode = mode;
-      this.cleanupDrag();
+      this.editMode = mode
+      this.cleanupDrag()
     },
 
     onTouchMove(e) {
-      if (!this.dragItem || this.editItem) return;
+      if (!this.dragItem || this.editItem) return
 
-      const touch = e.touches[0];
-      const dy = Math.abs(touch.clientY - this.startY);
+      const touch = e.touches[0]
+      const dy = Math.abs(touch.clientY - this.startY)
 
       if (dy > 5) {
-        clearTimeout(this.longPressTimer);
-        this.hasMoved = true;
+        clearTimeout(this.longPressTimer)
+        this.hasMoved = true
 
         if (!this.dragging) {
-          this.startDrag();
+          this.startDrag()
         }
 
         if (this.dragging && this.clone) {
-          this.clone.style.top = `${touch.clientY - 20}px`;
-          this.clone.style.left = `${touch.clientX - this.clone.offsetWidth / 2}px`;
+          this.clone.style.top = `${touch.clientY - 20}px`
+          this.clone.style.left = `${touch.clientX - this.clone.offsetWidth / 2}px`
 
-          const targetRect = this.$refs.targetContainer.getBoundingClientRect();
-          this.enteredTargetZone = touch.clientY < targetRect.bottom;
+          const targetRect = this.$refs.targetContainer.getBoundingClientRect()
+          this.enteredTargetZone = touch.clientY < targetRect.bottom
         }
       }
     },
 
     startDrag() {
-      this.dragging = true;
+      this.dragging = true
 
       // Запрещаем перетаскивание в верхнем списке (сортировку)
       if (this.dragMode === 'target') {
-        this.cleanupDrag();
-        return;
+        this.cleanupDrag()
+        return
       }
 
-      this.clone = document.createElement("div");
-      this.clone.textContent = this.dragItem.name;
+      this.clone = document.createElement('div')
+      this.clone.textContent = this.dragItem.name
       Object.assign(this.clone.style, {
-        position: "fixed",
-        zIndex: "9999",
-        background: "white",
-        padding: "12px",
-        borderRadius: "8px",
-        boxShadow: "0 4px 10px rgba(255, 107, 53, 0.25)",
-        pointerEvents: "none",
-        opacity: "0.95",
+        position: 'fixed',
+        zIndex: '9999',
+        background: 'white',
+        padding: '12px',
+        borderRadius: '8px',
+        boxShadow: '0 4px 10px rgba(255, 107, 53, 0.25)',
+        pointerEvents: 'none',
+        opacity: '0.95',
         left: `${event.touches[0].clientX - 60}px`,
         top: `${event.touches[0].clientY - 20}px`,
-        minWidth: "130px",
-        textAlign: "center",
-        fontWeight: "bold",
-        border: "2px solid #e65a2c",
-        fontSize: "14px",
-      });
-      document.body.appendChild(this.clone);
+        minWidth: '130px',
+        textAlign: 'center',
+        fontWeight: 'bold',
+        border: '2px solid #e65a2c',
+        fontSize: '14px',
+      })
+      document.body.appendChild(this.clone)
 
-      if (this.dragMode === "source") {
-        this.sourceBackup = [...this.sourceItems];
+      if (this.dragMode === 'source') {
+        this.sourceBackup = [...this.sourceItems]
       }
     },
 
     onTouchEnd() {
-      clearTimeout(this.longPressTimer);
-      document.body.style.webkitUserSelect = '';
-      document.body.style.userSelect = '';
+      clearTimeout(this.longPressTimer)
+      document.body.style.webkitUserSelect = ''
+      document.body.style.userSelect = ''
 
       if (this.dragging) {
-        if (this.dragMode === "source") {
+        if (this.dragMode === 'source') {
           if (this.enteredTargetZone) {
-            this.sourceItems = this.sourceBackup;
-            const item = this.sourceBackup.find(i => i.id === this.dragItem.id);
+            this.sourceItems = this.sourceBackup
+            const item = this.sourceBackup.find((i) => i.id === this.dragItem.id)
             if (item) {
               this.targetItems.push({
                 id: `${item.id}-${Date.now()}`,
                 name: item.name,
                 addedAt: new Date(),
-                sets: []
-              });
+                sets: [],
+              })
             }
           } else {
-            this.updateSourceOrder();
+            this.updateSourceOrder()
           }
         }
         // Сортировка в target отключена — ничего не делаем
 
         if (this.clone) {
-          document.body.removeChild(this.clone);
-          this.clone = null;
+          document.body.removeChild(this.clone)
+          this.clone = null
         }
       }
 
-      this.cleanupDrag();
+      this.cleanupDrag()
     },
 
     updateSourceOrder() {
-      const currentIndex = this.sourceBackup.findIndex(i => i.id === this.dragItem.id);
-      if (currentIndex === -1) return;
+      const currentIndex = this.sourceBackup.findIndex((i) => i.id === this.dragItem.id)
+      if (currentIndex === -1) return
 
-      const container = this.$refs.sourceContainer;
-      const items = Array.from(container.children);
-      let newIndex = 0;
+      const container = this.$refs.sourceContainer
+      const items = Array.from(container.children)
+      let newIndex = 0
       for (let i = 0; i < items.length; i++) {
-        const rect = items[i].getBoundingClientRect();
+        const rect = items[i].getBoundingClientRect()
         if (event.changedTouches[0].clientY < rect.bottom) {
-          newIndex = i;
-          break;
+          newIndex = i
+          break
         }
       }
 
       if (newIndex !== currentIndex) {
-        const newItems = [...this.sourceBackup];
-        const [moved] = newItems.splice(currentIndex, 1);
-        newItems.splice(newIndex, 0, moved);
-        this.sourceItems = newItems;
+        const newItems = [...this.sourceBackup]
+        const [moved] = newItems.splice(currentIndex, 1)
+        newItems.splice(newIndex, 0, moved)
+        this.sourceItems = newItems
       }
     },
 
     cleanupDrag() {
-      this.dragging = false;
-      this.dragItem = null;
-      this.dragMode = null;
-      this.hasMoved = false;
-      this.clone = null;
-      this.sourceBackup = null;
-      this.targetBackup = null;
+      this.dragging = false
+      this.dragItem = null
+      this.dragMode = null
+      this.hasMoved = false
+      this.clone = null
+      this.sourceBackup = null
+      this.targetBackup = null
     },
 
     closeEditPopup() {
-      this.editItem = null;
-      this.editMode = null;
+      this.editItem = null
+      this.editMode = null
     },
 
     deleteItem() {
-      if (this.editMode === "source") {
-        this.sourceItems = this.sourceItems.filter(i => i.id !== this.editItem.id);
+      if (this.editMode === 'source') {
+        this.sourceItems = this.sourceItems.filter((i) => i.id !== this.editItem.id)
       } else {
-        this.targetItems = this.targetItems.filter(i => i.id !== this.editItem.id);
+        this.targetItems = this.targetItems.filter((i) => i.id !== this.editItem.id)
       }
-      this.closeEditPopup();
+      this.closeEditPopup()
     },
 
     saveEdit() {
-      if (this.editMode === "source") {
-        const idx = this.sourceItems.findIndex(i => i.id === this.editItem.id);
+      if (this.editMode === 'source') {
+        const idx = this.sourceItems.findIndex((i) => i.id === this.editItem.id)
         if (idx !== -1) {
           this.sourceItems[idx] = {
             id: this.editItem.id,
             name: this.editItem.name,
             repsMin: this.editItem.repsMin,
-            repsMax: this.editItem.repsMax
-          };
+            repsMax: this.editItem.repsMax,
+          }
         }
       } else {
-        const idx = this.targetItems.findIndex(i => i.id === this.editItem.id);
+        const idx = this.targetItems.findIndex((i) => i.id === this.editItem.id)
         if (idx !== -1) {
           this.targetItems[idx] = {
             ...this.targetItems[idx],
-            sets: this.editItem.sets
-          };
+            sets: this.editItem.sets,
+          }
         }
       }
-      this.closeEditPopup();
+      this.closeEditPopup()
     },
   },
-  beforeUnmount() {
-    clearTimeout(this.longPressTimer);
-    if (this.clone) document.body.removeChild(this.clone);
-    document.body.style.webkitUserSelect = '';
-    document.body.style.userSelect = '';
+  beforeMount() {
+    this.tg.isVerticalSwipesEnabled = false
   },
-};
+  beforeUnmount() {
+    clearTimeout(this.longPressTimer)
+    if (this.clone) document.body.removeChild(this.clone)
+    document.body.style.webkitUserSelect = ''
+    document.body.style.userSelect = ''
+  },
+}
 </script>
 
 <style></style>
